@@ -29,7 +29,7 @@ public class Menu {
         foods.add(food);
         food = new FoodBuilder().category("애피타이저").name("시저샐러드").price(8000).build();
         foods.add(food);
-        food = new FoodBuilder().category("메인").name("티본스테이크").price(6000).build();
+        food = new FoodBuilder().category("메인").name("티본스테이크").price(55000).build();
         foods.add(food);
         food = new FoodBuilder().category("메인").name("바비큐립").price(54000).build();
         foods.add(food);
