@@ -73,7 +73,7 @@
  ┃ ┃ ┃ ┃ ┗ 📜Order.java<br/>
  ┃ ┃ ┃ ┣ 📂parser<br/>
  ┃ ┃ ┃ ┃ ┗ 📜Parser.java<br/>
- ┃ ┃ ┃ ┣ 📂validate
+ ┃ ┃ ┃ ┣ 📂validate<br/>
  ┃ ┃ ┃ ┃ ┗ 📜InputValidate.java<br/>
  ┃ ┃ ┃ ┣ 📂view<br/>
  ┃ ┃ ┃ ┃ ┣ 📜InputView.java<br/>
