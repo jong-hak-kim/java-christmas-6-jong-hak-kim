@@ -108,6 +108,6 @@ public class EventTest {
     void 이벤트_배지_테스트() {
         int totalBenefitAmount = 7000;
         Event event = new Event();
-        Assertions.assertThat(event.getbadge(totalBenefitAmount)).isEqualTo("별");
+        Assertions.assertThat(event.getbadge(totalBenefitAmount)).isEqualTo(5000);
     }
 }
