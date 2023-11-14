@@ -28,7 +28,8 @@ public enum ConstantMessage {
     STAR("별"),
     DECEMBER_EVENT_BADGE("<12월 이벤트 배지>"),
     DRINK("음료"),
-    MAIN("메인");
+    MAIN("메인"),
+    DESSERT("디저트");
 
     private final String message;
 
