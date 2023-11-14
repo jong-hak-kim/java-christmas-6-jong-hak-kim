@@ -1,15 +1,21 @@
 package christmas.view;
 
 import camp.nextstep.edu.missionutils.Console;
+import christmas.constant.ConstantMessage;
 import christmas.parser.Parser;
 import christmas.validate.InputValidate;
+import static christmas.constant.ConstantMessage.*;
 
 public class InputView {
+
+    public static void printConstantMessage(ConstantMessage constantMessage) {
+        System.out.println(constantMessage.getMessage());
+    }
 
     public int readDate() {
         InputValidate inputValidate = new InputValidate();
         Parser parser = new Parser();
-        System.out.println("12월 중 식당 예상 방문 날짜는 언제인가요? (숫자만 입력해 주세요!)");
+        printConstantMessage(INPUT_DATE);
         String input = Console.readLine();
 
         inputValidate.validateNull(input);
@@ -22,11 +28,11 @@ public class InputView {
 
     public String readMenu() {
         InputValidate inputValidate = new InputValidate();
-        System.out.println("주문하실 메뉴를 메뉴와 개수를 알려 주세요. (e.g. 해산물파스타-2,레드와인-1,초코케이크-1)");
+        printConstantMessage(INPUT_ORDER_MENU);
         String input = Console.readLine();
 
         inputValidate.validateNull(input);
-        
+
         return input;
     }
 }
