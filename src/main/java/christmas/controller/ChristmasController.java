@@ -1,12 +1,17 @@
 package christmas.controller;
 
+import static christmas.exception.ErrorMessage.INCORRECT_DATE;
+import static christmas.exception.ErrorMessage.INCORRECT_ORDER;
+
 import java.util.Map;
 
+import christmas.exception.ErrorMessage;
 import christmas.model.Event;
 import christmas.model.Food;
 import christmas.model.Order;
 import christmas.parser.Parser;
 import christmas.view.InputView;
+import christmas.view.OutputView;
 
 public class ChristmasController {
 
@@ -26,13 +31,17 @@ public class ChristmasController {
         getEvent(date, order);
     }
 
+    public static void printErrorMessage(ErrorMessage errorMessage) {
+        System.out.println(errorMessage.getErrorMessage());
+    }
+
     public int inputDate() {
         while (true) {
             try {
                 int input = inputView.readDate();
                 return input;
             } catch (NumberFormatException numberFormatException) {
-                System.out.println("[ERROR] 유효하지 않은 날짜입니다. 다시 입력해 주세요.");
+                printErrorMessage(INCORRECT_DATE);
                 continue;
             } catch (IllegalArgumentException illegalArgumentException) {
                 continue;
@@ -46,7 +55,7 @@ public class ChristmasController {
                 String input = inputView.readMenu();
                 return Order.takeOrder(input);
             } catch (NumberFormatException numberFormatException) {
-                System.out.println("[ERROR] 유효하지 않은 주문입니다. 다시 입력해 주세요.");
+                printErrorMessage(INCORRECT_ORDER);
                 continue;
             } catch (IllegalArgumentException illegalArgumentException) {
                 continue;
@@ -56,77 +65,100 @@ public class ChristmasController {
 
     public void getEvent(int date, Map<Food, Integer> order) {
 
-        System.out.println("12월 " + date + "일에 우테코 식당에서 받을 이벤트 혜택 미리 보기!");
-        System.out.println();
-
+        OutputView.printEventPreview(date);
         int sumPrice = event.getSumPrice(order);
+        
+        OutputView.printMenu(order);
+
+        String parseSumPrice = Parser.parseNumberFormat(sumPrice);
+        OutputView.printBeforeBeneiftMoney(parseSumPrice);
+
+        boolean hasGiftEvent = event.checkGiftEvent(sumPrice);
+        OutputView.printGiftMenu(hasGiftEvent);
+
+        int totalBenefitAmount = getBenefitList(date, sumPrice, order);
+
+        String parseTotalBenefitAmount = Parser.parseNumberFormat(totalBenefitAmount);
+        OutputView.printTotalBenefitAmount(parseTotalBenefitAmount);
+
+        int sumDiscountPrice = getSumDiscountPrice(hasGiftEvent, sumPrice, totalBenefitAmount);
+        String parseSumDiscountPrice = Parser.parseNumberFormat(sumDiscountPrice);
+        OutputView.printAfterBenefitTotalMoney(parseSumDiscountPrice);
+
+        int badge = event.getbadge(totalBenefitAmount);
+        OutputView.printBadge(badge);
+    }
+
+    public int getBenefitList(int date, int sumPrice, Map<Food, Integer> order) {
         int dayOfWeekNumber = event.getWeekNumber(date);
         int totalBenefitAmount = 0;
-
-        System.out.println("<주문 메뉴>");
-        for (Food food : order.keySet()) {
-            System.out.println(food.getName() + " " + order.get(food) + "개");
-        }
-
-        System.out.println();
-        System.out.println("<할인 전 총주문 금액>");
-        System.out.println(Parser.parseNumberFormat(sumPrice) + "원");
-
-        System.out.println();
-        System.out.println("<증정 메뉴>");
-        boolean hasGiftEvent = event.checkGiftEvent(sumPrice);
-        if (hasGiftEvent) {
-            System.out.println("샴페인 1개");
-        }
-        if (!hasGiftEvent) {
-            System.out.println("없음");
-        }
-
-        System.out.println();
-        System.out.println("<혜택 내역>");
+        OutputView.printBenefitList();
         if (event.checkEventQualify(sumPrice)) {
-            if (event.checkChristmasEvent(date)) {
-                int christmasEventBenefitAmount = event.getChristmasEventBenefitAmount(date);
-                totalBenefitAmount += christmasEventBenefitAmount;
-                System.out.println("크리스마스 디데이 할인: -" + Parser.parseNumberFormat(christmasEventBenefitAmount) + "원");
-            }
-            if (event.checkGiftEvent(sumPrice)) {
-                int giftEventBenefitAmount = event.getGiftEventBenefitAmount();
-                totalBenefitAmount += giftEventBenefitAmount;
-                System.out.println("증정 이벤트: -" + Parser.parseNumberFormat(giftEventBenefitAmount) + "원");
-            }
-            if (event.checkWeekday(dayOfWeekNumber)) {
-                int getDessertCount = event.getDessertCount(order);
-                int weekdayBenefitAmount = event.getWeekdayBenefitAmount(getDessertCount);
-                totalBenefitAmount += weekdayBenefitAmount;
-                System.out.println("평일 할인: -" + Parser.parseNumberFormat(weekdayBenefitAmount) + "원");
-            }
-            if (!event.checkWeekday(dayOfWeekNumber)) {
-                int getMainMenuCount = event.getMainMenuCount(order);
-                int weekendBenefitAmount = event.getWeekendBenefitAmount(getMainMenuCount);
-                totalBenefitAmount += weekendBenefitAmount;
-                System.out.println("주말 할인: -" + Parser.parseNumberFormat(weekendBenefitAmount) + "원");
-            }
-            if (event.checkSpecialEvent(date)) {
-                int specialEventBenefitAmount = event.getSpecialEventBenefitAmount();
-                totalBenefitAmount += specialEventBenefitAmount;
-                System.out.println("특별 할인: -" + Parser.parseNumberFormat(specialEventBenefitAmount) + "원");
-            }
+            totalBenefitAmount += getChristmasEvent(date);
+            totalBenefitAmount += getGiftEvent(sumPrice);
+            totalBenefitAmount += getWeekdayEvent(dayOfWeekNumber, order);
+            totalBenefitAmount += getWeekendEvent(dayOfWeekNumber, order);
+            totalBenefitAmount += getSpecialEvent(date);
         }
         if (!event.checkEventQualify(sumPrice)) {
-            System.out.println("없음");
+            OutputView.printNothing();
         }
+        return totalBenefitAmount;
+    }
 
-        System.out.println();
-        System.out.println("<총혜택 금액>");
-        if (totalBenefitAmount == 0) {
-            System.out.println(Parser.parseNumberFormat(totalBenefitAmount) + "원");
+    public int getChristmasEvent(int date) {
+        int christmasEventBenefitAmount = 0;
+        if (event.checkChristmasEvent(date)) {
+            christmasEventBenefitAmount = event.getChristmasEventBenefitAmount(date);
+            String parseChristmasEventBenefitAmount = Parser.parseNumberFormat(christmasEventBenefitAmount);
+            OutputView.printChristmasDiscount(parseChristmasEventBenefitAmount);
         }
-        if (totalBenefitAmount > 0) {
-            System.out.println("-" + Parser.parseNumberFormat(totalBenefitAmount) + "원");
-        }
+        return christmasEventBenefitAmount;
+    }
 
-        System.out.println();
+    public int getGiftEvent(int sumPrice) {
+        int giftEventBenefitAmount = 0;
+        if (event.checkGiftEvent(sumPrice)) {
+            giftEventBenefitAmount = event.getGiftEventBenefitAmount();
+            String parseGiftEventBenefitAmount = Parser.parseNumberFormat(giftEventBenefitAmount);
+            OutputView.printGiftDiscount(parseGiftEventBenefitAmount);
+        }
+        return giftEventBenefitAmount;
+    }
+
+    public int getWeekdayEvent(int dayOfWeekNumber, Map<Food, Integer> order) {
+        int weekdayBenefitAmount = 0;
+        if (event.checkWeekday(dayOfWeekNumber)) {
+            int getDessertCount = event.getDessertCount(order);
+            weekdayBenefitAmount = event.getWeekdayBenefitAmount(getDessertCount);
+            String ParseWeekdayBenefitAmount = Parser.parseNumberFormat(weekdayBenefitAmount);
+            OutputView.printWeekdayDiscount(ParseWeekdayBenefitAmount);
+        }
+        return weekdayBenefitAmount;
+    }
+
+    public int getWeekendEvent(int dayOfWeekNumber, Map<Food, Integer> order) {
+        int weekendBenefitAmount = 0;
+        if (!event.checkWeekday(dayOfWeekNumber)) {
+            int getMainMenuCount = event.getMainMenuCount(order);
+            weekendBenefitAmount = event.getWeekendBenefitAmount(getMainMenuCount);
+            String parseWeekendBenefitAmount = Parser.parseNumberFormat(weekendBenefitAmount);
+            OutputView.printWeekendDiscount(parseWeekendBenefitAmount);
+        }
+        return weekendBenefitAmount;
+    }
+
+    public int getSpecialEvent(int date) {
+        int specialEventBenefitAmount = 0;
+        if (event.checkSpecialEvent(date)) {
+            specialEventBenefitAmount = event.getSpecialEventBenefitAmount();
+            String parseSpecialEventBenefitAmount = Parser.parseNumberFormat(specialEventBenefitAmount);
+            OutputView.printSpecialDiscount(parseSpecialEventBenefitAmount);
+        }
+        return specialEventBenefitAmount;
+    }
+
+    public int getSumDiscountPrice(boolean hasGiftEvent, int sumPrice, int totalBenefitAmount) {
         int sumDiscountPrice = 0;
         if (hasGiftEvent) {
             sumDiscountPrice = sumPrice - totalBenefitAmount - event.getGiftEventBenefitAmount();
@@ -134,12 +166,6 @@ public class ChristmasController {
         if (!hasGiftEvent) {
             sumDiscountPrice = sumPrice - totalBenefitAmount;
         }
-        System.out.println("<할인 후 예상 결제 금액>");
-        System.out.println(Parser.parseNumberFormat(sumDiscountPrice) + "원");
-
-        System.out.println();
-        String badge = event.getbadge(totalBenefitAmount);
-        System.out.println("<12월 이벤트 배지>");
-        System.out.println(badge);
+        return sumDiscountPrice;
     }
 }
