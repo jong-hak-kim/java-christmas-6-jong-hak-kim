@@ -2,14 +2,23 @@ package christmas.validate;
 
 import java.util.Map;
 
+import christmas.exception.ErrorMessage;
 import christmas.model.Food;
+
+import static christmas.exception.ErrorMessage.*;
+import static christmas.constant.ConstantMessage.DRINK;
 
 import java.util.List;
 
 public class InputValidate {
+
+    public static void printErrorMessage(ErrorMessage errorMessage) {
+        System.out.println(errorMessage.getErrorMessage());
+    }
+
     public void validateNull(String input) {
         if (input.isBlank()) {
-            System.out.println("[ERROR] 아무 것도 입력되지 않았습니다.");
+            printErrorMessage(INPUT_NOTHING);
             throw new IllegalArgumentException();
         }
     }
@@ -19,8 +28,10 @@ public class InputValidate {
     }
 
     public void validateRange(int input) {
-        if (input < 1 || input > 31) {
-            System.out.println("[ERROR] 유효하지 않은 날짜입니다. 다시 입력해 주세요.");
+        final int MIN_DATE = 1;
+        final int MAX_DATE = 31;
+        if (input < MIN_DATE || input > MAX_DATE) {
+            printErrorMessage(INCORRECT_DATE);
             throw new IllegalArgumentException();
         }
     }
@@ -34,14 +45,15 @@ public class InputValidate {
             }
         }
         if (!hasMenu) {
-            System.out.println("[ERROR] 유효하지 않은 주문입니다. 다시 입력해 주세요.");
+            printErrorMessage(INCORRECT_ORDER);
             throw new IllegalArgumentException();
         }
     }
 
     public void validateMenuCount(int count) {
-        if (count < 1) {
-            System.out.println("[ERROR] 유효하지 않은 주문입니다. 다시 입력해 주세요.");
+        int LEAST_MENU_COUNT = 1;
+        if (LEAST_MENU_COUNT < 1) {
+            printErrorMessage(INCORRECT_ORDER);
             throw new IllegalArgumentException();
         }
     }
@@ -49,7 +61,7 @@ public class InputValidate {
     public void validateDuplicateMenu(Map<Food, Integer> parseOrderFood, String name) {
         for (Food food : parseOrderFood.keySet()) {
             if (food.getName().equals(name)) {
-                System.out.println("[ERROR] 유효하지 않은 주문입니다. 다시 입력해 주세요.");
+                printErrorMessage(INCORRECT_ORDER);
                 throw new IllegalArgumentException();
             }
         }
@@ -59,24 +71,25 @@ public class InputValidate {
     public void validateOnlyDrink(List<Food> foods, Map<Food, Integer> parseOrderFood) {
         int drinkCount = 0;
         for (Food food : parseOrderFood.keySet()) {
-            if (food.getCategory().equals("음료")) {
+            if (food.getCategory().equals(DRINK.getMessage())) {
                 drinkCount++;
             }
         }
         if (drinkCount == parseOrderFood.size()) {
-            System.out.println("[ERROR] 음료만 주문할 수 없습니다.");
+            printErrorMessage(ONLY_ORDER_DRINK);
             throw new IllegalArgumentException();
         }
 
     }
 
     public void validateMenuOverflow(Map<Food, Integer> parseOrderFood) {
+        final int MAX_MENU_COUNT = 20;
         int count = 0;
         for (Food key : parseOrderFood.keySet()) {
             count += parseOrderFood.get(key);
         }
-        if (count > 20) {
-            System.out.println("[ERROR] 20개 이상의 메뉴는 주문하실 수 없습니다.");
+        if (count > MAX_MENU_COUNT) {
+            printErrorMessage(OVER_TWENTY_MENU);
             throw new IllegalArgumentException();
         }
     }
