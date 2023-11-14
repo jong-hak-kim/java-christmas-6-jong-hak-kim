@@ -1,5 +1,8 @@
 package christmas.model;
 
+import static christmas.constant.ConstantMessage.DESSERT;
+import static christmas.constant.ConstantMessage.MAIN;
+
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
@@ -16,62 +19,68 @@ public class Event {
     }
 
     public boolean checkEventQualify(int sumPrice) {
-        if (sumPrice < 10000) {
+        final int QUALIFICATION_PRICE = 10000;
+        if (sumPrice < QUALIFICATION_PRICE) {
             return false;
         }
         return true;
     }
 
     public boolean checkChristmasEvent(int date) {
-        if (date > 25) {
+        final int CHRISTMAS_DATE = 25;
+        if (date > CHRISTMAS_DATE) {
             return false;
         }
         return true;
     }
 
     public int getChristmasEventBenefitAmount(int date) {
-        int basicDiscount = 1000;
-        int discount = 100;
-        int benefitAmount = basicDiscount + (discount * (date - 1));
+        final int BASIC_DISCOUNT = 1000;
+        final int DISCOUNT = 100;
+        final int ONE = 1;
+        int benefitAmount = BASIC_DISCOUNT + (DISCOUNT * (date - ONE));
         return benefitAmount;
     }
 
     public boolean checkGiftEvent(int sumPrice) {
-        if (sumPrice < 120000) {
+        final int QUALIFICATION_PRICE = 120000;
+        if (sumPrice < QUALIFICATION_PRICE) {
             return false;
         }
         return true;
     }
 
     public int getGiftEventBenefitAmount() {
-        int giftPrice = 25000;
-        return giftPrice;
+        final int GIFT_PRICE = 25000;
+        return GIFT_PRICE;
     }
 
     public boolean checkWeekday(int dayOfWeekNumber) {
-        if (dayOfWeekNumber == 5 || dayOfWeekNumber == 6) {
+        final int FRIDAY = 5;
+        final int SATURDAY = 6;
+        if (dayOfWeekNumber == FRIDAY || dayOfWeekNumber == SATURDAY) {
             return false;
         }
         return true;
     }
 
     public boolean checkSpecialEvent(int date) {
-        List<Integer> specialDates = List.of(3, 10, 17, 24, 25, 31);
-        if (!specialDates.contains(date)) {
+        final List<Integer> SPECIAL_DATES = List.of(3, 10, 17, 24, 25, 31);
+        if (!SPECIAL_DATES.contains(date)) {
             return false;
         }
         return true;
     }
 
     public int getSpecialEventBenefitAmount() {
-        int discountAmount = 1000;
-        return discountAmount;
+        final int DISCOUNT_AMOUNT = 1000;
+        return DISCOUNT_AMOUNT;
     }
 
     public int getDessertCount(Map<Food, Integer> orderFood) {
         int dessertCount = 0;
         for (Food food : orderFood.keySet()) {
-            if (food.getCategory().equals("디저트")) {
+            if (food.getCategory().equals(DESSERT.getMessage())) {
                 dessertCount += orderFood.get(food);
             }
         }
@@ -79,15 +88,15 @@ public class Event {
     }
 
     public int getWeekdayBenefitAmount(int dessertCount) {
-        int discountDessert = 2023;
-        int benefitAmount = discountDessert * dessertCount;
+        final int DISCOUNT_DESSERT = 2023;
+        int benefitAmount = DISCOUNT_DESSERT * dessertCount;
         return benefitAmount;
     }
 
     public int getMainMenuCount(Map<Food, Integer> orderFood) {
         int mainMenuCount = 0;
         for (Food food : orderFood.keySet()) {
-            if (food.getCategory().equals("메인")) {
+            if (food.getCategory().equals(MAIN.getMessage())) {
                 mainMenuCount += orderFood.get(food);
             }
         }
@@ -95,28 +104,34 @@ public class Event {
     }
 
     public int getWeekendBenefitAmount(int mainMenuCount) {
-        int discountMainMenu = 2023;
-        int benefitAmount = discountMainMenu * mainMenuCount;
+        final int DISCOUNT_MAIN_MENU = 2023;
+        int benefitAmount = DISCOUNT_MAIN_MENU * mainMenuCount;
         return benefitAmount;
     }
 
     public int getWeekNumber(int date) {
-        LocalDate calendar = LocalDate.of(2023, 12, date);
+        final int YEAR = 2023;
+        final int DECEMBER = 12;
+        LocalDate calendar = LocalDate.of(YEAR, DECEMBER, date);
         DayOfWeek dayOfWeek = calendar.getDayOfWeek();
         int dayOfWeekNumber = dayOfWeek.getValue();
         return dayOfWeekNumber;
     }
 
-    public String getbadge(int totalBenefitAmount) {
-        if (totalBenefitAmount >= 20000) {
-            return "산타";
+    public int getbadge(int totalBenefitAmount) {
+        final int SANTA_MONEY = 20000;
+        final int TREE_MONEY = 10000;
+        final int STAR_MONEY = 5000;
+        final int NOTHING = 0;
+        if (totalBenefitAmount >= SANTA_MONEY) {
+            return SANTA_MONEY;
         }
-        if (totalBenefitAmount >= 10000) {
-            return "트리";
+        if (totalBenefitAmount >= TREE_MONEY) {
+            return TREE_MONEY;
         }
-        if (totalBenefitAmount >= 5000) {
-            return "별";
+        if (totalBenefitAmount >= STAR_MONEY) {
+            return STAR_MONEY;
         }
-        return "없음";
+        return NOTHING;
     }
 }
